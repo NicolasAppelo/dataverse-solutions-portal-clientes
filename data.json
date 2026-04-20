@@ -225,6 +225,32 @@
           "responsible": "client"
         }
       ]
+    },
+    {
+      "id": "proj1776692033478",
+      "name": "APLEX SAS",
+      "desc": "APLEX SAS",
+      "color": "blue",
+      "clientPassword": "Alpex2026",
+      "startDate": "2026-04-01",
+      "endDate": "2026-06-30",
+      "modules": [
+        {
+          "id": "m1",
+          "name": "Módulo principal",
+          "pct": 0
+        }
+      ],
+      "milestones": [
+        {
+          "id": "ms1",
+          "title": "Firma de contrato",
+          "date": "2026-04-01",
+          "done": true,
+          "notes": "",
+          "responsible": "dvs"
+        }
+      ]
     }
   ]
 }
