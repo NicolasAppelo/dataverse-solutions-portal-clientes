@@ -526,8 +526,9 @@ function renderAdmContent(){
   const el=document.getElementById("adm-content");if(!el)return;
   if(admSect==="milestones"){
     el.innerHTML=(proj.milestones||[]).map(ms=>`
-      <div class="adm-ms-card">
+      <div class="adm-ms-card" draggable="true" data-id="${ms.id}" ondragstart="dragStart(event,'ms')" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dragDrop(event,'ms')">
         <div class="adm-row">
+          <div class="drag-handle" title="Arrastrar para reordenar">⠷</div>
           <input type="text" value="${ms.title}" oninput="updMs('${ms.id}','title',this.value)" placeholder="Título" style="flex:2;min-width:140px"/>
           <input type="date" value="${ms.date}" onchange="updMs('${ms.id}','date',this.value)"/>
           <select onchange="updMs('${ms.id}','responsible',this.value)" style="min-width:130px">
