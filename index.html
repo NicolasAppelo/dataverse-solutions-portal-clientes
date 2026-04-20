@@ -121,6 +121,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--bdr2);background:transparent;color:var(--txt2);transition:all .15s}
 .btn:hover{background:var(--surf2)}
 .btn-danger{padding:5px 11px;font-size:12px;border-radius:7px;cursor:pointer;border:1px solid #e8a0a0;background:#FCEBEB;color:#A32D2D;font-family:'DM Sans',sans-serif}
+.drag-handle{display:flex;align-items:center;justify-content:center;width:20px;cursor:grab;color:var(--bdr2);flex-shrink:0;user-select:none;font-size:14px;line-height:1}
+.drag-handle:active{cursor:grabbing}
+.adm-ms-card[draggable=true],.adm-mod-card[draggable=true]{transition:opacity .15s,box-shadow .15s}
+.adm-ms-card.drag-over,.adm-mod-card.drag-over{box-shadow:0 0 0 2px var(--bdr2);opacity:.7}
+.adm-ms-card.dragging,.adm-mod-card.dragging{opacity:.35}
 .btn-add{padding:8px 16px;font-size:13px;border-radius:8px;cursor:pointer;border:1px solid var(--bdr2);background:transparent;color:var(--txt2);font-family:'DM Sans',sans-serif;margin-top:4px}
 .btn-add:hover{background:var(--surf2)}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:200;padding:16px}
@@ -549,8 +554,9 @@ function renderAdmContent(){
     </div>`;
   }else if(admSect==="modules"){
     el.innerHTML=(proj.modules||[]).map(m=>`
-      <div class="adm-mod-card">
+      <div class="adm-mod-card" draggable="true" data-id="${m.id}" ondragstart="dragStart(event,'mod')" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dragDrop(event,'mod')">
         <div class="adm-row">
+          <div class="drag-handle" title="Arrastrar para reordenar">⠿</div>
           <input type="text" value="${m.name}" oninput="updModName('${m.id}',this.value)" style="flex:1;min-width:140px"/>
           <span class="pct-val" style="color:${pal.main}" id="av-${m.id}">${m.pct}%</span>
           <button class="btn-danger" onclick="delMod('${m.id}')">Eliminar</button>
@@ -589,6 +595,47 @@ function renderAdmContent(){
         </div>
       </div>`;
   }
+}
+
+/* ── DRAG & DROP ── */
+let _dragId = null, _dragType = null;
+
+function dragStart(e, type) {
+  _dragId   = e.currentTarget.dataset.id;
+  _dragType = type;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function dragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const el = e.currentTarget;
+  el.classList.add('drag-over');
+}
+function dragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function dragDrop(e, type) {
+  e.preventDefault();
+  const targetId = e.currentTarget.dataset.id;
+  e.currentTarget.classList.remove('drag-over');
+  document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+  if (!_dragId || _dragId === targetId || _dragType !== type) return;
+
+  const proj = data[activeTab];
+  const arr  = type === 'ms' ? proj.milestones : proj.modules;
+  const fromIdx = arr.findIndex(x => x.id === _dragId);
+  const toIdx   = arr.findIndex(x => x.id === targetId);
+  if (fromIdx < 0 || toIdx < 0) return;
+
+  /* Reorder */
+  const [item] = arr.splice(fromIdx, 1);
+  arr.splice(toIdx, 0, item);
+
+  save();
+  renderAdmContent();
+  renderProject();
+  _dragId = null; _dragType = null;
 }
 
 function switchTab(i){activeTab=i;renderTabs();renderProject();renderAdminPanel();}
