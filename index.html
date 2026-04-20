@@ -57,16 +57,19 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',system-ui,sans-
 .tl-bar-wrap{position:relative;margin-bottom:8px}
 .tl-bar-bg{height:6px;background:var(--surf3);border-radius:3px;position:relative}
 .tl-bar-prog{height:100%;border-radius:3px;transition:width .5s}
-.tl-today-line{position:absolute;top:-7px;width:2px;border-radius:1px;height:20px;transform:translateX(-50%)}
+.tl-today-line{position:absolute;top:-8px;width:2px;border-radius:1px;height:22px;transform:translateX(-50%)}
 .tl-today-lbl{position:absolute;top:-22px;transform:translateX(-50%);font-size:10px;font-weight:600;color:var(--txt);white-space:nowrap;background:var(--surf);padding:1px 5px;border-radius:3px;border:1px solid var(--bdr)}
 .tl-dates{display:flex;justify-content:space-between;margin-top:6px}
 .tl-date-lbl{font-size:11px;color:var(--txt3)}
-.tl-dots-row{position:relative;height:60px;margin-top:10px}
+.tl-dots-row{position:relative;height:90px;margin-top:4px}
 .tl-dot-wrap{position:absolute;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;cursor:default}
-.tl-dot{width:13px;height:13px;border-radius:50%;border:2.5px solid var(--surf);flex-shrink:0;transition:transform .15s;z-index:2}
-.tl-dot-wrap:hover .tl-dot{transform:scale(1.35)}
-.tl-dot-line{width:1.5px;height:12px;background:var(--bdr)}
-.tl-dot-lbl{font-size:9px;max-width:72px;text-align:center;color:var(--txt2);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-dot-wrap.above{flex-direction:column-reverse;top:0}
+.tl-dot-wrap.below{flex-direction:column;top:44px}
+.tl-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--surf);flex-shrink:0;transition:transform .15s;z-index:2}
+.tl-dot-wrap:hover .tl-dot{transform:scale(1.4)}
+.tl-dot-line{width:1px;height:16px;background:var(--bdr2)}
+.tl-dot-lbl{font-size:9px;max-width:68px;text-align:center;color:var(--txt2);line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tl-dot-wrap:hover .tl-dot-lbl{color:var(--txt);font-weight:500}
 .ms-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-bottom:20px}
 @media(max-width:640px){.ms-grid{grid-template-columns:1fr}}
 .ms-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rl);padding:20px}
@@ -348,9 +351,12 @@ function fmtDate(s){
   const mo=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
   return d+" "+mo[+m-1]+" "+y;
 }
+/* Parse date as LOCAL time to avoid UTC offset issues */
+function parseD(s){if(!s)return null;const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d);}
 function tlPct(ds,ss,es){
-  const d=new Date(ds),s=new Date(ss),e=new Date(es);
-  if(e<=s)return 50;return Math.max(0,Math.min(100,((d-s)/(e-s))*100));
+  const d=parseD(ds),s=parseD(ss),e=parseD(es);
+  if(!d||!s||!e||e<=s)return 0;
+  return Math.max(0,Math.min(100,((d-s)/(e-s))*100));
 }
 function msSt(ms){
   if(ms.done)return"done";
@@ -410,14 +416,15 @@ function renderProject(){
     </div>`;
   }
 
-  const dotHtml=ms.map(m=>{
+  const dotHtml=ms.map((m,mi)=>{
     if(!proj.startDate||!proj.endDate)return"";
     const pct=tlPct(m.date,proj.startDate,proj.endDate);
     const st=msSt(m),dvs=m.responsible==="dvs";
     const color=st==="done"?pal.main:st==="late"?"#A32D2D":dvs?pal.main:CLIENT_CLR.main;
     const bg=st==="done"?color:"#fff";
-    return `<div class="tl-dot-wrap" style="left:${pct}%;top:0" title="${m.title} — ${fmtDate(m.date)}">
-      <div class="tl-dot" style="background:${bg};box-shadow:0 0 0 2.5px ${color}"></div>
+    const side=mi%2===0?"above":"below"; /* alternate above/below */
+    return `<div class="tl-dot-wrap ${side}" style="left:${pct}%" title="${m.title} — ${fmtDate(m.date)}">
+      <div class="tl-dot" style="background:${bg};box-shadow:0 0 0 2px ${color}"></div>
       <div class="tl-dot-line"></div>
       <div class="tl-dot-lbl">${m.title}</div>
     </div>`;
