@@ -13,26 +13,6 @@
           "id": "m1",
           "name": "WhatsApp + Evolution API",
           "pct": 100
-        },
-        {
-          "id": "m2",
-          "name": "Transcripción Whisper AI",
-          "pct": 85
-        },
-        {
-          "id": "m3",
-          "name": "Extracción de datos",
-          "pct": 70
-        },
-        {
-          "id": "m4",
-          "name": "CRM Google Sheets",
-          "pct": 65
-        },
-        {
-          "id": "m5",
-          "name": "Confirmaciones automáticas",
-          "pct": 40
         }
       ],
       "milestones": [
