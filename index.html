@@ -232,7 +232,7 @@ function showSave(msg,ok){
 async function loadFromGitHub(){
   try{
     showSave("Cargando…");
-    const res=await fetch(API_URL,{headers:{Authorization:"Bearer "+ADMIN_GH_TOKEN,Accept:"application/vnd.github+json","Cache-Control":"no-cache"}});
+    const res=await fetch(API_URL+"?t="+Date.now(),{headers:{Authorization:"Bearer "+ADMIN_GH_TOKEN,Accept:"application/vnd.github+json"}});
     if(!res.ok)throw new Error("HTTP "+res.status);
     const j=await res.json();
     _fileSha=j.sha;
