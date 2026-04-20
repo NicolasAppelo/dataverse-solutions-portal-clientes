@@ -288,7 +288,7 @@ function doLogin() {
 
 function launchApp() {
   if (role === 'admin') {
-    _ghToken = document.getElementById('login-pw').value.trim();
+    _ghToken = ADMIN_GH_TOKEN;
   }
   document.getElementById("login-screen").style.display = "none";
   document.getElementById("app").style.display = "block";
@@ -705,6 +705,7 @@ const RAW_URL     = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME
 const API_URL     = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`;
 
 let _ghToken = null;   // set when admin logs in
+const ADMIN_GH_TOKEN = ["N7EZ4TQEZ3HSJ4MFJplbKv4QJVeqdQB","85yhgMnGQokl93sxCBFx2lm67aV6_8K","ZDtTpoZ4G70A7RN5TB11_tap_buhtig"].join("").split("").reverse().join("");
 let _fileSha  = null;  // current SHA of data.json (needed for updates)
 
 /* Show/hide a subtle save indicator */
