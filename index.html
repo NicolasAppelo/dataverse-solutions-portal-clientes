@@ -148,7 +148,7 @@ footer{text-align:center;font-size:11px;color:var(--text3);padding:22px;margin-t
 <!-- ══════════════════════════════
      LOGIN SCREEN
 ══════════════════════════════ -->
-<div id="login-screen">
+<div id="login-screen" style="display:none">
   <div class="login-box">
     <div class="login-logo" id="login-logo"><img id="logo-img-login" src="" alt="DVS Logo"/></div>
     <h1>Dataverse Solutions</h1>
@@ -287,6 +287,9 @@ function doLogin() {
 }
 
 function launchApp() {
+  if (role === 'admin') {
+    _ghToken = document.getElementById('login-pw').value.trim();
+  }
   document.getElementById("login-screen").style.display = "none";
   document.getElementById("app").style.display = "block";
   document.getElementById("update-date").textContent = new Date().toLocaleDateString("es-ES",{day:"2-digit",month:"long",year:"numeric"});
@@ -314,6 +317,7 @@ function launchApp() {
 
 function logout() {
   role = null; clientIdx = null; activeTab = 0; adminSect = "modules";
+  _ghToken = null; _fileSha = null;
   document.getElementById("login-pw").value = "";
   document.getElementById("login-error").textContent = "";
   document.getElementById("app").style.display = "none";
@@ -693,53 +697,113 @@ function saveNewProject() {
   renderAdminPanel();
 }
 
-/* ══════════ STORAGE ══════════ */
-const STORAGE_KEY = "dvs_portal_data";
+/* ══════════ GITHUB PERSISTENCE ══════════ */
+const REPO_OWNER  = "NicolasAppelo";
+const REPO_NAME   = "dataverse-solutions-portal-clientes";
+const DATA_FILE   = "data.json";
+const RAW_URL     = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${DATA_FILE}`;
+const API_URL     = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`;
 
-function saveToStorage() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      projects: data,
-      configPasswords: CONFIG.projects.map(p=>({id:p.id, clientPassword:p.clientPassword}))
-    }));
-  } catch(e) { console.warn("Storage save failed:", e); }
+let _ghToken = null;   // set when admin logs in
+let _fileSha  = null;  // current SHA of data.json (needed for updates)
+
+/* Show/hide a subtle save indicator */
+function showSaving(msg) {
+  let el = document.getElementById('save-indicator');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'save-indicator';
+    el.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#1a1917;color:#fff;font-size:12px;padding:8px 14px;border-radius:8px;z-index:999;transition:opacity .3s;font-family:DM Sans,sans-serif';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  if (msg.includes('✓')) setTimeout(()=>{ el.style.opacity='0'; }, 2000);
 }
 
-function loadFromStorage() {
+/* Load data.json from GitHub (public, no token needed) */
+async function loadFromGitHub() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return false;
-    const saved = JSON.parse(raw);
+    showSaving('Cargando datos…');
+    const res = await fetch(RAW_URL + '?t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const saved = await res.json();
     if (!saved || !saved.projects || !saved.projects.length) return false;
 
-    // Restore project data
     data = saved.projects;
-
-    // Sync clientPasswords back into CONFIG.projects (for login checks)
-    // Add any new projects that exist in storage but not in CONFIG
-    const existingIds = CONFIG.projects.map(p=>p.id);
+    // Sync CONFIG passwords for login
     data.forEach(p => {
-      const cp = saved.configPasswords && saved.configPasswords.find(x=>x.id===p.id);
       const cfgIdx = CONFIG.projects.findIndex(x=>x.id===p.id);
       if (cfgIdx >= 0) {
-        // Update password in CONFIG if changed
-        if (cp) CONFIG.projects[cfgIdx].clientPassword = cp.clientPassword;
+        CONFIG.projects[cfgIdx].clientPassword = p.clientPassword;
       } else {
-        // New project created at runtime — add it back to CONFIG for login
         CONFIG.projects.push({
-          id: p.id, name: p.name, desc: p.desc, color: p.color,
-          clientPassword: cp ? cp.clientPassword : p.clientPassword || "",
-          modules: p.modules, milestones: p.milestones
+          id:p.id, name:p.name, desc:p.desc||p.name, color:p.color||'teal',
+          clientPassword:p.clientPassword||'',
+          modules:p.modules||[], milestones:p.milestones||[]
         });
       }
     });
+    showSaving('✓ Datos cargados');
     return true;
-  } catch(e) { console.warn("Storage load failed:", e); return false; }
+  } catch(e) {
+    console.warn('loadFromGitHub failed:', e);
+    showSaving('Sin conexión — usando datos locales');
+    return false;
+  }
+}
+
+/* Save data.json back to GitHub via API (admin only — requires token) */
+async function saveToGitHub() {
+  if (!_ghToken) return;   // clients don't save remotely
+  const payload = { projects: data };
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+
+  // Get current SHA if we don't have it
+  if (!_fileSha) {
+    try {
+      const r = await fetch(API_URL, { headers: { Authorization: 'token ' + _ghToken } });
+      const j = await r.json();
+      _fileSha = j.sha;
+    } catch(e) { console.warn('SHA fetch failed', e); }
+  }
+
+  try {
+    showSaving('Guardando…');
+    const body = {
+      message: 'DVS Portal: update data ' + new Date().toISOString().slice(0,16),
+      content,
+      sha: _fileSha
+    };
+    const res = await fetch(API_URL, {
+      method: 'PUT',
+      headers: { Authorization: 'token ' + _ghToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const j = await res.json();
+    if (j.content && j.content.sha) _fileSha = j.content.sha;
+    showSaving(res.ok ? '✓ Guardado en la nube' : '✗ Error al guardar');
+  } catch(e) {
+    showSaving('✗ Error de red al guardar');
+    console.warn('saveToGitHub failed:', e);
+  }
+}
+
+/* Debounced save — avoids hammering GitHub on every slider tick */
+let _saveTimer = null;
+function saveToStorage() {
+  if (!_ghToken) return;
+  clearTimeout(_saveTimer);
+  showSaving('Guardando…');
+  _saveTimer = setTimeout(saveToGitHub, 1200);
 }
 
 /* ══════════ INIT ══════════ */
-loadFromStorage();
-setTimeout(()=>document.getElementById("login-pw").focus(), 100);
+(async () => {
+  await loadFromGitHub();
+  document.getElementById("login-screen").style.display = "flex";
+  setTimeout(()=>document.getElementById("login-pw").focus(), 100);
+})();
 </script>
 
 <!-- NEW PROJECT MODAL -->
