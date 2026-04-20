@@ -245,16 +245,20 @@ async function loadFromGitHub(){
       if(i>=0)CONFIG.projects[i].clientPassword=p.clientPassword;
       else CONFIG.projects.push({id:p.id,name:p.name,clientPassword:p.clientPassword||""});
     });
-    /* Step 2: get SHA for future writes — minimal headers, no Cache-Control */
-    try{
-      const sr=await fetch(API_URL,{headers:{Authorization:"Bearer "+ADMIN_GH_TOKEN,Accept:"application/vnd.github+json"}});
-      if(sr.ok){const sj=await sr.json();_fileSha=sj.sha;}
-    }catch(e){console.warn("SHA fetch failed (writes may not work):",e);}
+    /* SHA fetched lazily on first write */
     showSave("✓ Listo",true);return true;
   }catch(e){console.error("load error:",e);showSave("✗ Error cargando: "+e.message,false);return false;}
 }
 async function saveToGitHub(){
-  if(!_ghToken||!_fileSha)return;
+  if(!_ghToken)return;
+  /* Fetch SHA lazily on first save */
+  if(!_fileSha){
+    try{
+      const sr=await fetch(API_URL,{headers:{Authorization:"Bearer "+_ghToken,Accept:"application/vnd.github+json"}});
+      if(!sr.ok)throw new Error("SHA HTTP "+sr.status);
+      _fileSha=(await sr.json()).sha;
+    }catch(e){showSave("✗ No se pudo obtener SHA: "+e.message,false);return;}
+  }
   const content=btoa(unescape(encodeURIComponent(JSON.stringify({projects:data},null,2))));
   try{
     showSave("Guardando…");
