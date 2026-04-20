@@ -141,6 +141,21 @@
           "notes": ""
         }
       ]
+    },
+    {
+      "id": "proj1776685574899",
+      "name": "ALPEX SAS",
+      "desc": "Automatizacion de Procesos en Whatsapp",
+      "color": "blue",
+      "clientPassword": "Alpex2026",
+      "modules": [
+        {
+          "id": "m1",
+          "name": "Módulo principal",
+          "pct": 0
+        }
+      ],
+      "milestones": []
     }
   ]
 }
