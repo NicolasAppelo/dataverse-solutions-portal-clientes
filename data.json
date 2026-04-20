@@ -13,6 +13,11 @@
           "id": "m1",
           "name": "Modulo 1 - Reconocimiento de voz a texto",
           "pct": 100
+        },
+        {
+          "id": "m1776708142488",
+          "name": "Modulo 2 - Validacion por emial de pruebas",
+          "pct": 0
         }
       ],
       "milestones": [
