@@ -220,7 +220,7 @@ const CLIENT_CLR={main:"#BA7517",light:"#FAEEDA",txt:"#412402"};
 
 const REPO_OWNER="NicolasAppelo",REPO_NAME="dataverse-solutions-portal-clientes",DATA_FILE="data.json";
 const API_URL=`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`;
-const ADMIN_GH_TOKEN=["N7EZ4TQEZ3HSJ4MFJplbKv4QJVeqdQB","85yhgMnGQokl93sxCBFx2lm67aV6_8K","ZDtTpoZ4G70A7RN5TB11_tap_buhtig"].join("").split("").reverse().join("");
+const GH_TOKEN_KEY="dvs_gh_token"; /* stored in admin browser localStorage only */
 let _ghToken=null,_fileSha=null,_saveTimer=null;
 
 function showSave(msg,ok){
@@ -269,14 +269,23 @@ async function saveToGitHub(){
     const j=await res.json();_fileSha=j.content.sha;showSave("✓ Guardado",true);
   }catch(e){showSave("✗ Error: "+e.message,false);console.error("save error:",e);}
 }
-function save(){if(!_ghToken)return;clearTimeout(_saveTimer);showSave("Guardando…");_saveTimer=setTimeout(saveToGitHub,1500);}
+async function manualSave(){
+  if(!_ghToken){
+    showSave("✗ Sin token. Ve a Info del proyecto para configurarlo.",false);
+    setAdmSect("info"); renderAdminPanel();
+    return;
+  }
+  clearTimeout(_saveTimer);
+  await saveToGitHub();
+}
+function save(){if(!_ghToken){console.log("save() skipped: no token");return;}clearTimeout(_saveTimer);showSave("Guardando…");_saveTimer=setTimeout(saveToGitHub,1500);}
 
 let data=[],role=null,clientIdx=null,activeTab=0,admSect="milestones",npMods=[];
 
 function doLogin(){
   const pw=document.getElementById("login-pw").value.trim();
   document.getElementById("login-err").textContent="";
-  if(pw===CONFIG.adminPassword){role="admin";clientIdx=null;activeTab=0;_ghToken=ADMIN_GH_TOKEN;launchApp();return;}
+  if(pw===CONFIG.adminPassword){role="admin";clientIdx=null;activeTab=0;_ghToken=localStorage.getItem(GH_TOKEN_KEY)||null;launchApp();return;}
   for(let i=0;i<data.length;i++){if(pw===data[i].clientPassword){role="client";clientIdx=i;activeTab=i;launchApp();return;}}
   document.getElementById("login-err").textContent="Contraseña incorrecta.";
 }
@@ -297,6 +306,24 @@ function launchApp(){
     document.getElementById("hdr-sub").textContent="Portal del Cliente";
   }
   renderProject();
+}
+function saveToken(){
+  const v=document.getElementById("gh-token-input")?.value.trim();
+  if(!v){showSave("✗ Token vacío",false);return;}
+  localStorage.setItem(GH_TOKEN_KEY,v);
+  _ghToken=v;_fileSha=null;
+  document.getElementById("token-status").textContent="✓ Token guardado";
+  showSave("✓ Token guardado — ya puedes guardar cambios",true);
+}
+function clearToken(){
+  localStorage.removeItem(GH_TOKEN_KEY);_ghToken=null;
+  const el=document.getElementById("gh-token-input");if(el)el.value="";
+  const st=document.getElementById("token-status");if(st)st.textContent="Sin token — no se guardarán cambios";
+  showSave("Token borrado",undefined);
+}
+function previewToken(v){
+  const st=document.getElementById("token-status");
+  if(st)st.textContent=v?("Token listo para guardar — click en 'Guardar token'"):"Sin token";
 }
 function logout(){
   role=null;clientIdx=null;activeTab=0;admSect="milestones";_ghToken=null;_fileSha=null;
@@ -455,11 +482,16 @@ function renderAdminPanel(){
   el.innerHTML=`<div class="adm-panel">
     <div class="adm-hdr">
       <div class="adm-title">Administración de proyectos <span class="badge">${proj.name}</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="manualSave()" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border:1px solid #085041;background:rgba(29,158,117,.1);color:#085041;transition:opacity .15s">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 6.5h11M7.5 2L12 6.5L7.5 11" stroke="#085041" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Publicar cambios
+      </button>
       <button class="adm-new-btn" style="background:${pal.main}" onclick="openNp()">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
         Nuevo proyecto
       </button>
-    </div>
+    </div></div>
     <div class="adm-tabs">
       <button class="adm-tab${admSect==="milestones"?" on":""}" style="${admSect==="milestones"?`border-color:${pal.main};color:${pal.main}`:""}" onclick="setAdmSect('milestones')">Actividades</button>
       <button class="adm-tab${admSect==="modules"?" on":""}" style="${admSect==="modules"?`border-color:${pal.main};color:${pal.main}`:""}" onclick="setAdmSect('modules')">Módulos</button>
@@ -528,6 +560,19 @@ function renderAdmContent(){
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div><label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:6px">Fecha inicio (contrato)</label><input type="date" value="${proj.startDate||""}" onchange="updProj('startDate',this.value)" style="width:100%"/></div>
         <div><label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:6px">Fecha entrega</label><input type="date" value="${proj.endDate||""}" onchange="updProj('endDate',this.value)" style="width:100%"/></div>
+      </div>
+      <div style="border-top:1px solid var(--bdr);padding-top:18px;margin-top:18px">
+        <div class="add-lbl">Token de escritura GitHub (solo en este navegador)</div>
+        <div style="font-size:12px;color:var(--txt3);margin-bottom:10px">Necesario para que el admin pueda guardar cambios. Se guarda solo en tu navegador, nunca en el código.</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input type="password" id="gh-token-input" placeholder="github_pat_..." value="${localStorage.getItem(GH_TOKEN_KEY)||''}" style="flex:1;min-width:200px" oninput="previewToken(this.value)"/>
+          <button onclick="saveToken()" style="padding:8px 16px;border-radius:8px;cursor:pointer;background:#1D9E75;color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500">Guardar token</button>
+          <button onclick="clearToken()" style="padding:8px 14px;border-radius:8px;cursor:pointer;border:1px solid #e8a0a0;background:#FCEBEB;color:#A32D2D;font-family:'DM Sans',sans-serif;font-size:12px">Borrar</button>
+        </div>
+        <div id="token-status" style="font-size:12px;margin-top:8px;color:var(--txt3)">${localStorage.getItem(GH_TOKEN_KEY)?'✓ Token guardado — escribe para actualizarlo':('Sin token — no se guardarán cambios en la nube')}</div>
+        <div style="margin-top:12px;padding:12px;background:var(--surf2);border-radius:8px;font-size:12px;color:var(--txt2)">
+          <strong style="color:var(--txt)">Cómo obtener el token:</strong> github.com → Settings → Developer settings → Fine-grained tokens → Generate → Solo este repo → Contents: Read &amp; write
+        </div>
       </div>`;
   }
 }
