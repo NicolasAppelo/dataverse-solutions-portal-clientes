@@ -9,22 +9,105 @@
       "startDate": "2025-01-10",
       "endDate": "2025-06-30",
       "modules": [
-        {"id":"m1","name":"WhatsApp + Evolution API","pct":100},
-        {"id":"m2","name":"Transcripción Whisper AI","pct":85},
-        {"id":"m3","name":"Extracción de datos","pct":70},
-        {"id":"m4","name":"CRM Google Sheets","pct":65},
-        {"id":"m5","name":"Confirmaciones automáticas","pct":40}
+        {
+          "id": "m1",
+          "name": "WhatsApp + Evolution API",
+          "pct": 100
+        },
+        {
+          "id": "m2",
+          "name": "Transcripción Whisper AI",
+          "pct": 85
+        },
+        {
+          "id": "m3",
+          "name": "Extracción de datos",
+          "pct": 70
+        },
+        {
+          "id": "m4",
+          "name": "CRM Google Sheets",
+          "pct": 65
+        },
+        {
+          "id": "m5",
+          "name": "Confirmaciones automáticas",
+          "pct": 40
+        }
       ],
       "milestones": [
-        {"id":"ms1","title":"Firma de contrato","date":"2025-01-10","done":true,"notes":"","responsible":"dvs"},
-        {"id":"ms2","title":"Setup N8N + Evolution API","date":"2025-01-20","done":true,"notes":"Servidor en Easypanel","responsible":"dvs"},
-        {"id":"ms3","title":"Integración Whisper AI","date":"2025-02-10","done":true,"notes":"","responsible":"dvs"},
-        {"id":"ms4","title":"Acceso y credenciales del cliente","date":"2025-02-20","done":true,"notes":"","responsible":"client"},
-        {"id":"ms5","title":"Flujo de registro end-to-end","date":"2025-03-15","done":false,"notes":"","responsible":"dvs"},
-        {"id":"ms6","title":"Validación de datos por equipo NULAB","date":"2025-04-01","done":false,"notes":"","responsible":"client"},
-        {"id":"ms7","title":"Pruebas piloto con equipo NULAB","date":"2025-04-20","done":false,"notes":"","responsible":"client"},
-        {"id":"ms8","title":"Ajustes finales","date":"2025-05-15","done":false,"notes":"","responsible":"dvs"},
-        {"id":"ms9","title":"Go-live producción","date":"2025-06-30","done":false,"notes":"","responsible":"dvs"}
+        {
+          "id": "ms1",
+          "title": "Firma de contrato",
+          "date": "2025-01-10",
+          "done": true,
+          "notes": "",
+          "responsible": "dvs"
+        },
+        {
+          "id": "ms2",
+          "title": "Setup N8N + Evolution API",
+          "date": "2025-01-20",
+          "done": true,
+          "notes": "Servidor en Easypanel",
+          "responsible": "dvs"
+        },
+        {
+          "id": "ms3",
+          "title": "Integración Whisper AI",
+          "date": "2025-02-10",
+          "done": true,
+          "notes": "",
+          "responsible": "dvs"
+        },
+        {
+          "id": "ms4",
+          "title": "Acceso y credenciales del cliente",
+          "date": "2025-02-20",
+          "done": true,
+          "notes": "",
+          "responsible": "client"
+        },
+        {
+          "id": "ms5",
+          "title": "Flujo de registro end-to-end",
+          "date": "2025-03-15",
+          "done": false,
+          "notes": "",
+          "responsible": "dvs"
+        },
+        {
+          "id": "ms6",
+          "title": "Validación de datos por equipo NULAB",
+          "date": "2025-04-01",
+          "done": false,
+          "notes": "",
+          "responsible": "client"
+        },
+        {
+          "id": "ms7",
+          "title": "Pruebas piloto con equipo NULAB",
+          "date": "2025-04-20",
+          "done": false,
+          "notes": "",
+          "responsible": "client"
+        },
+        {
+          "id": "ms8",
+          "title": "Ajustes finales",
+          "date": "2025-05-15",
+          "done": false,
+          "notes": "",
+          "responsible": "dvs"
+        },
+        {
+          "id": "ms9",
+          "title": "Go-live producción",
+          "date": "2025-06-30",
+          "done": false,
+          "notes": "",
+          "responsible": "dvs"
+        }
       ]
     },
     {
@@ -33,24 +116,114 @@
       "desc": "Agente IA de consejería y bienestar con WhatsApp, CRM y calendario integrado",
       "color": "pink",
       "clientPassword": "amor2025",
-      "startDate": "2025-01-15",
-      "endDate": "2025-05-30",
+      "startDate": "2026-03-09",
+      "endDate": "2026-05-31",
       "modules": [
-        {"id":"m1","name":"Agente GPT-4 WhatsApp","pct":90},
-        {"id":"m2","name":"Procesamiento de voz","pct":75},
-        {"id":"m3","name":"CRM Google Sheets","pct":80},
-        {"id":"m4","name":"Integración calendario","pct":55},
-        {"id":"m5","name":"Flujos de seguimiento","pct":30}
+        {
+          "id": "m1",
+          "name": "Modulo 1 - Automatizacion Inteligente de Whatsapp",
+          "pct": 78
+        },
+        {
+          "id": "m2",
+          "name": "Modulo 2 - Automatizacion de Redes Sociales",
+          "pct": 0
+        },
+        {
+          "id": "m3",
+          "name": "Modulo 3 - Agendamiento por Whatsapp",
+          "pct": 100
+        }
       ],
       "milestones": [
-        {"id":"ms1","title":"Firma de contrato","date":"2025-01-15","done":true,"notes":"","responsible":"dvs"},
-        {"id":"ms2","title":"Diseño del agente y system prompt","date":"2025-01-25","done":true,"notes":"","responsible":"dvs"},
-        {"id":"ms3","title":"Integración N8N + GPT-4","date":"2025-02-15","done":true,"notes":"","responsible":"dvs"},
-        {"id":"ms4","title":"Contenido y guión del agente","date":"2025-02-28","done":true,"notes":"","responsible":"client"},
-        {"id":"ms5","title":"CRM y gestión de contactos","date":"2025-03-10","done":true,"notes":"","responsible":"dvs"},
-        {"id":"ms6","title":"Aprobación de flujos de conversación","date":"2025-03-20","done":false,"notes":"Pendiente aprobación","responsible":"client"},
-        {"id":"ms7","title":"Integración calendario y citas","date":"2025-04-10","done":false,"notes":"","responsible":"dvs"},
-        {"id":"ms8","title":"Go-live y optimización","date":"2025-05-30","done":false,"notes":"","responsible":"dvs"}
+        {
+          "id": "ms1",
+          "title": "Kickoff",
+          "date": "2026-03-09",
+          "done": true,
+          "notes": "",
+          "responsible": "dvs"
+        },
+        {
+          "id": "ms2",
+          "title": "Envio Formulario de Informacion a EDA",
+          "date": "2026-03-11",
+          "done": true,
+          "notes": "Envio Formulario de Informacion a EDA para diligenciar",
+          "responsible": "dvs"
+        },
+        {
+          "id": "ms3",
+          "title": "Envio Formulario de Informacion a Dataverse",
+          "date": "2026-03-16",
+          "done": true,
+          "notes": "",
+          "responsible": "client"
+        },
+        {
+          "id": "ms4",
+          "title": "Setup de APIs, integracion a Whatsapp",
+          "date": "2026-03-23",
+          "done": true,
+          "notes": "Setup de APIs, integracion a Whatsapp, base conocimiento inicial",
+          "responsible": "dvs"
+        },
+        {
+          "id": "ms5",
+          "title": "Creacion BD centralizada",
+          "date": "2026-03-25",
+          "done": true,
+          "notes": "Validacion de datos, sistemas de permisos y exportaciones",
+          "responsible": "dvs"
+        },
+        {
+          "id": "ms6",
+          "title": "Sistema de Agendamiento",
+          "date": "2026-04-10",
+          "done": true,
+          "notes": "Sistema de Agendamiento automatico con Google Calendar, recordatorios via Whatsapp (24h y 2h previas), gestion de disponibilidad",
+          "responsible": "dvs"
+        },
+        {
+          "id": "ms7",
+          "title": "Envio de formulario",
+          "date": "2026-04-20",
+          "done": false,
+          "notes": "Formulario de primera sesion tras confirmacion de agendamiento",
+          "responsible": "client"
+        },
+        {
+          "id": "ms8",
+          "title": "Retroalimentacion",
+          "date": "2026-04-24",
+          "done": false,
+          "notes": "Integracion con Google Calendar para agendamiento automatico",
+          "responsible": "client"
+        },
+        {
+          "id": "ms9",
+          "title": "Retroalimentacion",
+          "date": "2026-04-24",
+          "done": false,
+          "notes": "Sistema de recordatorios automaticos 24h y 2 horas previas",
+          "responsible": "client"
+        },
+        {
+          "id": "ms10",
+          "title": "Capacitacion",
+          "date": "2026-04-30",
+          "done": false,
+          "notes": "Virtual con el equipo, gestion de flujos",
+          "responsible": "dvs"
+        },
+        {
+          "id": "ms11",
+          "title": "Pruebas internas",
+          "date": "2026-04-30",
+          "done": false,
+          "notes": "Realizar pruebas internas y ajustes de tono y flujo conversacional con el equipo de EDA",
+          "responsible": "client"
+        }
       ]
     }
   ]
