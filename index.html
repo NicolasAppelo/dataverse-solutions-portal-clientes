@@ -220,7 +220,10 @@ const CLIENT_CLR={main:"#BA7517",light:"#FAEEDA",txt:"#412402"};
 
 const REPO_OWNER="NicolasAppelo",REPO_NAME="dataverse-solutions-portal-clientes",DATA_FILE="data.json";
 const API_URL=`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`;
-const GH_TOKEN_KEY="dvs_gh_token"; /* stored in admin browser localStorage only */
+/* Token is XOR-encrypted with admin password and stored in data.json */
+function xorStr(str,key){let r="";for(let i=0;i<str.length;i++)r+=String.fromCharCode(str.charCodeAt(i)^key.charCodeAt(i%key.length));return r;}
+function encryptToken(token,pass){return btoa(xorStr(token,pass));}
+function decryptToken(enc,pass){try{return xorStr(atob(enc),pass);}catch(e){return null;}}
 let _ghToken=null,_fileSha=null,_saveTimer=null;
 
 function showSave(msg,ok){
@@ -285,7 +288,8 @@ let data=[],role=null,clientIdx=null,activeTab=0,admSect="milestones",npMods=[];
 function doLogin(){
   const pw=document.getElementById("login-pw").value.trim();
   document.getElementById("login-err").textContent="";
-  if(pw===CONFIG.adminPassword){role="admin";clientIdx=null;activeTab=0;_ghToken=localStorage.getItem(GH_TOKEN_KEY)||null;launchApp();return;}
+  if(pw===CONFIG.adminPassword){role="admin";clientIdx=null;activeTab=0;_ghToken = data._adminToken ? decryptToken(data._adminToken, pw) : null;
+    launchApp(); return;}
   for(let i=0;i<data.length;i++){if(pw===data[i].clientPassword){role="client";clientIdx=i;activeTab=i;launchApp();return;}}
   document.getElementById("login-err").textContent="Contraseña incorrecta.";
 }
@@ -307,18 +311,21 @@ function launchApp(){
   }
   renderProject();
 }
-function saveToken(){
+async function saveToken(){
   const v=document.getElementById("gh-token-input")?.value.trim();
   if(!v){showSave("✗ Token vacío",false);return;}
-  localStorage.setItem(GH_TOKEN_KEY,v);
   _ghToken=v;_fileSha=null;
-  document.getElementById("token-status").textContent="✓ Token guardado";
-  showSave("✓ Token guardado — ya puedes guardar cambios",true);
+  /* Encrypt with admin password and store in data so all devices can use it */
+  data._adminToken=encryptToken(v,CONFIG.adminPassword);
+  document.getElementById("token-status").textContent="Guardando en la nube…";
+  await saveToGitHub();
+  document.getElementById("token-status").textContent="✓ Token guardado en todos los dispositivos";
 }
-function clearToken(){
-  localStorage.removeItem(GH_TOKEN_KEY);_ghToken=null;
+async function clearToken(){
+  _ghToken=null;delete data._adminToken;
   const el=document.getElementById("gh-token-input");if(el)el.value="";
-  const st=document.getElementById("token-status");if(st)st.textContent="Sin token — no se guardarán cambios";
+  const st=document.getElementById("token-status");if(st)st.textContent="Sin token";
+  await saveToGitHub();
   showSave("Token borrado",undefined);
 }
 function previewToken(v){
@@ -565,11 +572,11 @@ function renderAdmContent(){
         <div class="add-lbl">Token de escritura GitHub (solo en este navegador)</div>
         <div style="font-size:12px;color:var(--txt3);margin-bottom:10px">Necesario para que el admin pueda guardar cambios. Se guarda solo en tu navegador, nunca en el código.</div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <input type="password" id="gh-token-input" placeholder="github_pat_..." value="${localStorage.getItem(GH_TOKEN_KEY)||''}" style="flex:1;min-width:200px" oninput="previewToken(this.value)"/>
+          <input type="password" id="gh-token-input" placeholder="github_pat_..." value="" style="flex:1;min-width:200px" oninput="previewToken(this.value)"/>
           <button onclick="saveToken()" style="padding:8px 16px;border-radius:8px;cursor:pointer;background:#1D9E75;color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500">Guardar token</button>
           <button onclick="clearToken()" style="padding:8px 14px;border-radius:8px;cursor:pointer;border:1px solid #e8a0a0;background:#FCEBEB;color:#A32D2D;font-family:'DM Sans',sans-serif;font-size:12px">Borrar</button>
         </div>
-        <div id="token-status" style="font-size:12px;margin-top:8px;color:var(--txt3)">${localStorage.getItem(GH_TOKEN_KEY)?'✓ Token guardado — escribe para actualizarlo':('Sin token — no se guardarán cambios en la nube')}</div>
+        <div id="token-status" style="font-size:12px;margin-top:8px;color:var(--txt3)">${data._adminToken?'✓ Token configurado en todos los dispositivos — escribe para actualizarlo':'Sin token — no se guardarán cambios en la nube'}</div>
         <div style="margin-top:12px;padding:12px;background:var(--surf2);border-radius:8px;font-size:12px;color:var(--txt2)">
           <strong style="color:var(--txt)">Cómo obtener el token:</strong> github.com → Settings → Developer settings → Fine-grained tokens → Generate → Solo este repo → Contents: Read &amp; write
         </div>
