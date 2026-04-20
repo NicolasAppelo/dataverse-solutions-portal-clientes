@@ -18,6 +18,11 @@
           "id": "m1776708142488",
           "name": "Modulo 2 - Validacion por email de pruebas",
           "pct": 0
+        },
+        {
+          "id": "m1776708177654",
+          "name": "Modulo 3 - Generacion de reporte en PDF",
+          "pct": 0
         }
       ],
       "milestones": [
