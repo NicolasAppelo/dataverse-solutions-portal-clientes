@@ -232,7 +232,7 @@ function showSave(msg,ok){
 async function loadFromGitHub(){
   try{
     showSave("Cargando…");
-    const res=await fetch(API_URL,{headers:{Authorization:"token "+ADMIN_GH_TOKEN,Accept:"application/vnd.github+json","Cache-Control":"no-cache"}});
+    const res=await fetch(API_URL,{headers:{Authorization:"Bearer "+ADMIN_GH_TOKEN,Accept:"application/vnd.github+json","Cache-Control":"no-cache"}});
     if(!res.ok)throw new Error("HTTP "+res.status);
     const j=await res.json();
     _fileSha=j.sha;
@@ -245,14 +245,14 @@ async function loadFromGitHub(){
       else CONFIG.projects.push({id:p.id,name:p.name,clientPassword:p.clientPassword||""});
     });
     showSave("✓ Listo",true);return true;
-  }catch(e){console.warn("load error:",e);showSave("",undefined);return false;}
+  }catch(e){console.error("load error:",e);showSave("✗ Error cargando datos: "+e.message,false);return false;}
 }
 async function saveToGitHub(){
   if(!_ghToken||!_fileSha)return;
   const content=btoa(unescape(encodeURIComponent(JSON.stringify({projects:data},null,2))));
   try{
     showSave("Guardando…");
-    const res=await fetch(API_URL,{method:"PUT",headers:{Authorization:"token "+_ghToken,"Content-Type":"application/json",Accept:"application/vnd.github+json"},
+    const res=await fetch(API_URL,{method:"PUT",headers:{Authorization:"Bearer "+_ghToken,"Content-Type":"application/json",Accept:"application/vnd.github+json"},
       body:JSON.stringify({message:"DVS Portal update "+new Date().toISOString().slice(0,16).replace("T"," "),content,sha:_fileSha})});
     if(!res.ok)throw new Error((await res.json().catch(()=>({}))).message||"HTTP "+res.status);
     const j=await res.json();_fileSha=j.content.sha;showSave("✓ Guardado",true);
@@ -325,6 +325,10 @@ function renderTabs(){
 }
 
 function renderProject(){
+  if(!data.length){
+    document.getElementById("proj-view").innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--txt3)"><div style="font-size:32px;margin-bottom:12px">📂</div><div style="font-size:15px;font-weight:500;color:var(--txt2);margin-bottom:6px">No hay proyectos cargados</div><div style="font-size:13px">Los datos no pudieron cargarse desde GitHub. Revisa la consola del navegador (F12) para más detalles.</div></div>`;
+    return;
+  }
   const proj=data[activeTab];if(!proj)return;
   const pal=PAL[proj.color||"teal"];
   const ms=proj.milestones||[],mods=proj.modules||[];
@@ -431,6 +435,10 @@ function renderProject(){
 
 function renderAdminPanel(){
   const el=document.getElementById("adm-panel");el.style.display="block";
+  if(!data.length){
+    el.innerHTML=`<div class="adm-panel"><div class="adm-hdr"><div class="adm-title">Administración de proyectos</div><button class="adm-new-btn" style="background:#1D9E75" onclick="openNp()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>Nuevo proyecto</button></div><p style="font-size:13px;color:var(--txt3);padding:10px 0">No hay proyectos. Crea el primero con el botón de arriba.</p></div>`;
+    return;
+  }
   const proj=data[activeTab];if(!proj)return;
   const pal=PAL[proj.color||"teal"];
   el.innerHTML=`<div class="adm-panel">
