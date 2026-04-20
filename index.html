@@ -229,15 +229,17 @@ function showSave(msg,ok){
   el.style.opacity="1";el.textContent=msg;
   if(ok!==undefined)setTimeout(()=>{el.style.opacity="0";},2500);
 }
-const RAW_URL=`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${DATA_FILE}`;
-
+/* GET without Authorization = simple request = no CORS preflight
+   PUT with Authorization = preflight, but GitHub allows it from any origin */
 async function loadFromGitHub(){
   try{
     showSave("Cargando…");
-    /* Step 1: read content via raw URL — no auth, no preflight, no CORS issues */
-    const res=await fetch(RAW_URL+"?t="+Date.now());
+    /* No Authorization header → simple GET → no preflight → works from any origin */
+    const res=await fetch(API_URL+"?t="+Date.now(),{headers:{Accept:"application/vnd.github+json"}});
     if(!res.ok)throw new Error("HTTP "+res.status);
-    const dec=await res.json();
+    const j=await res.json();
+    _fileSha=j.sha; /* capture SHA now for later writes */
+    const dec=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,"")))));
     if(!dec?.projects?.length)return false;
     data=dec.projects;
     data.forEach(p=>{
@@ -245,19 +247,18 @@ async function loadFromGitHub(){
       if(i>=0)CONFIG.projects[i].clientPassword=p.clientPassword;
       else CONFIG.projects.push({id:p.id,name:p.name,clientPassword:p.clientPassword||""});
     });
-    /* SHA fetched lazily on first write */
     showSave("✓ Listo",true);return true;
   }catch(e){console.error("load error:",e);showSave("✗ Error cargando: "+e.message,false);return false;}
 }
 async function saveToGitHub(){
   if(!_ghToken)return;
-  /* Fetch SHA lazily on first save */
   if(!_fileSha){
+    /* Get SHA without auth first (simple request) */
     try{
-      const sr=await fetch(API_URL,{headers:{Authorization:"Bearer "+_ghToken,Accept:"application/vnd.github+json"}});
-      if(!sr.ok)throw new Error("SHA HTTP "+sr.status);
-      _fileSha=(await sr.json()).sha;
-    }catch(e){showSave("✗ No se pudo obtener SHA: "+e.message,false);return;}
+      const r=await fetch(API_URL,{headers:{Accept:"application/vnd.github+json"}});
+      if(r.ok)_fileSha=(await r.json()).sha;
+    }catch(e){}
+    if(!_fileSha){showSave("✗ Sin SHA — recarga la página",false);return;}
   }
   const content=btoa(unescape(encodeURIComponent(JSON.stringify({projects:data},null,2))));
   try{
