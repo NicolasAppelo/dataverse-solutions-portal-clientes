@@ -229,14 +229,15 @@ function showSave(msg,ok){
   el.style.opacity="1";el.textContent=msg;
   if(ok!==undefined)setTimeout(()=>{el.style.opacity="0";},2500);
 }
+const RAW_URL=`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${DATA_FILE}`;
+
 async function loadFromGitHub(){
   try{
     showSave("Cargando…");
-    const res=await fetch(API_URL+"?t="+Date.now(),{headers:{Authorization:"Bearer "+ADMIN_GH_TOKEN,Accept:"application/vnd.github+json"}});
+    /* Step 1: read content via raw URL — no auth, no preflight, no CORS issues */
+    const res=await fetch(RAW_URL+"?t="+Date.now());
     if(!res.ok)throw new Error("HTTP "+res.status);
-    const j=await res.json();
-    _fileSha=j.sha;
-    const dec=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,"")))));
+    const dec=await res.json();
     if(!dec?.projects?.length)return false;
     data=dec.projects;
     data.forEach(p=>{
@@ -244,8 +245,13 @@ async function loadFromGitHub(){
       if(i>=0)CONFIG.projects[i].clientPassword=p.clientPassword;
       else CONFIG.projects.push({id:p.id,name:p.name,clientPassword:p.clientPassword||""});
     });
+    /* Step 2: get SHA for future writes — minimal headers, no Cache-Control */
+    try{
+      const sr=await fetch(API_URL,{headers:{Authorization:"Bearer "+ADMIN_GH_TOKEN,Accept:"application/vnd.github+json"}});
+      if(sr.ok){const sj=await sr.json();_fileSha=sj.sha;}
+    }catch(e){console.warn("SHA fetch failed (writes may not work):",e);}
     showSave("✓ Listo",true);return true;
-  }catch(e){console.error("load error:",e);showSave("✗ Error cargando datos: "+e.message,false);return false;}
+  }catch(e){console.error("load error:",e);showSave("✗ Error cargando: "+e.message,false);return false;}
 }
 async function saveToGitHub(){
   if(!_ghToken||!_fileSha)return;
