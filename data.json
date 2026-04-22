@@ -93,7 +93,7 @@
         {
           "id": "ms9",
           "title": "Go-live producción",
-          "date": "2025-06-30",
+          "date": "2025-05-30",
           "done": false,
           "notes": "",
           "responsible": "dvs"
@@ -177,7 +177,7 @@
         {
           "id": "ms7",
           "title": "Envio de formulario",
-          "date": "2026-04-24",
+          "date": "2026-04-20",
           "done": false,
           "notes": "Formulario de primera sesion tras confirmacion de agendamiento",
           "responsible": "client"
@@ -218,7 +218,7 @@
     },
     {
       "id": "proj1776692033478",
-      "name": "ALPEX SAS",
+      "name": "APLEX SAS",
       "desc": "APLEX SAS",
       "color": "blue",
       "clientPassword": "Alpex2026",
