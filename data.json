@@ -263,6 +263,14 @@
           "done": false,
           "notes": "",
           "responsible": "dvs"
+        },
+        {
+          "id": "ms1778331552319",
+          "title": "Go-live y monitoreo",
+          "date": "2026-05-29",
+          "done": false,
+          "notes": "",
+          "responsible": "dvs"
         }
       ]
     }
