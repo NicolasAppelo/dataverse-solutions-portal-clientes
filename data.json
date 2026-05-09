@@ -178,7 +178,7 @@
           "id": "ms7",
           "title": "Envio de formulario",
           "date": "2026-04-20",
-          "done": false,
+          "done": 1,
           "notes": "Formulario de primera sesion tras confirmacion de agendamiento",
           "responsible": "client"
         },
