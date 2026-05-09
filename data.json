@@ -239,6 +239,14 @@
           "done": true,
           "notes": "",
           "responsible": "dvs"
+        },
+        {
+          "id": "ms1778331450163",
+          "title": "Configuración y arquitectura",
+          "date": "2026-04-17",
+          "done": false,
+          "notes": "",
+          "responsible": "dvs"
         }
       ]
     }
