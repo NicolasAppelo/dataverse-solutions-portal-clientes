@@ -227,7 +227,7 @@
       "modules": [
         {
           "id": "m1",
-          "name": "Agente interacción con clientes",
+          "name": "Agente interacción con clientes activos",
           "pct": 0
         }
       ],
