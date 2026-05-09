@@ -227,7 +227,7 @@
       "modules": [
         {
           "id": "m1",
-          "name": "Recopilación e información",
+          "name": "Agente interacción con clientes",
           "pct": 0
         }
       ],
