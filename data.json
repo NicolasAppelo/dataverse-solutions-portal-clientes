@@ -210,7 +210,7 @@
           "id": "ms11",
           "title": "Pruebas internas",
           "date": "2026-04-30",
-          "done": false,
+          "done": 1,
           "notes": "Realizar pruebas internas y ajustes de tono y flujo conversacional con el equipo de EDA",
           "responsible": "client"
         }
