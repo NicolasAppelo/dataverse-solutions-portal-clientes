@@ -186,7 +186,7 @@
           "id": "ms8",
           "title": "Retroalimentacion",
           "date": "2026-04-24",
-          "done": false,
+          "done": 1,
           "notes": "Integracion con Google Calendar para agendamiento automatico",
           "responsible": "client"
         },
